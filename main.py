@@ -1,12 +1,31 @@
-import billboardgeometry
-import billboardmaterial
+
+import datetime
+import platform
+WindowTitle = "Billboard-Example"
+if __name__ == "__main__":
+    print()
+    print(datetime.datetime.now().strftime('%H:%M:%S'))
+    print(WindowTitle)
+    print("Loading Modules")#,end="")
+    if platform.system() == 'Windows':
+        try:
+            import ctypes
+            myAppId = u'{}{}'.format(WindowTitle , datetime.datetime.now().strftime('%H:%M:%S')) # arbitrary string
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myAppId)
+        except:
+            pass
+
+#import billboardgeometry
+#import billboardmaterial
+import sys
+from PyQt5 import QtWidgets,QtCore,QtGui,Qt , Qt3DAnimation,Qt3DCore,Qt3DExtras,Qt3DInput,Qt3DLogic,Qt3DRender , QtQml
 
 #include <QColor>
 #include <QDebug>
 #include <QObject>
 #include <QPropertyAnimation>
 #include <QThread>
-#include <QVector3D>
+#include <QtGui.QVector3D>
 
 #include <Qt3DCore/QEntity>
 #include <Qt3DCore/QTransform>
@@ -35,199 +54,211 @@ import billboardmaterial
 #include <QCommandLinkButton>
 #include <QPushButton>
 
-int main(int argc, char *argv[])
-{
-    ### Application
-    QApplication app(argc, argv)
+class MainWindow(QtWidgets.QMainWindow):
+    def __init__(self, parent = None):
+        self.cMode = 1
+        super(MainWindow, self).__init__(parent)
+        self.setWindowTitle("AGE Test Window")
+        self.setWindowIcon(QtWidgets.QApplication.style().standardIcon(QtWidgets.QStyle.SP_ComputerIcon))
+        self.Display = Qt3DExtras.Qt3DWindow()
+        self.DisplayContainer = QtWidgets.QWidget.createWindowContainer(self.Display)
 
-    ### Window
-    Qt3DExtras.Qt3DWindow *view = new Qt3DExtras.Qt3DWindow()
+        ### Root entity
+        self.rootEntity = Qt3DCore.QEntity()
+        
+        self.screenSize = self.Display.screen().size()
+        self.DisplayContainer.setMinimumSize(QtCore.QSize(400, 300))
+        self.DisplayContainer.setMaximumSize(self.screenSize)
+        
+        self.central_widget = QtWidgets.QWidget(self)
+        self.controlWidget = QtWidgets.QWidget(self)
+        self.hLayout = QtWidgets.QHBoxLayout(self.central_widget)
+        self.vLayout = QtWidgets.QVBoxLayout()
+        self.controlLayout = QtWidgets.QGridLayout(self.controlWidget)
+        self.vLayout.setAlignment(QtCore.Qt.AlignTop)
+        self.hLayout.addWidget(self.DisplayContainer, 1)
+        self.hLayout.addLayout(self.vLayout)
+        self.vLayout.addWidget(self.controlWidget)
+        self.setCentralWidget(self.central_widget)
 
-    ### Root entity
-    Qt3DCore.QEntity *rootEntity = new Qt3DCore.QEntity()
+        ### Create control widget
+        self.info = QtWidgets.QCommandLinkButton()
+        self.info.setText("Qt3D Billboard")
+        self.info.setIconSize(QtCore.QSize(0,0))
 
-    QWidget *container = QWidget.createWindowContainer(view)
-    QSize screenSize = view.screen().size()
-    container.setMinimumSize(QSize(400, 300))
-    container.setMaximumSize(screenSize)
+        ### Random size
+        self.randomSizeButton = QtWidgets.QPushButton(self.controlWidget)
+        self.randomSizeButton.setText("Random Size")
+        self.randomSizeButton.setToolTip("Random Size")
 
-    QWidget *widget = new QWidget
-    QWidget *controlWidget = new QWidget
-    QHBoxLayout *hLayout = new QHBoxLayout(widget)
-    QVBoxLayout *vLayout = new QVBoxLayout
-    QGridLayout *controlLayout = new QGridLayout(controlWidget)
-    vLayout.setAlignment(Qt.AlignTop)
-    hLayout.addWidget(container, 1)
-    hLayout.addLayout(vLayout)
-    vLayout.addWidget(controlWidget)
+        ### Bigger billboard size
+        self.biggerSizeButton = QtWidgets.QPushButton(self.controlWidget)
+        self.biggerSizeButton.setText("Make Bigger")
+        self.biggerSizeButton.setToolTip("Make the size of billboard bigger")
 
-    ### Create control widget
-    QCommandLinkButton *info = new QCommandLinkButton()
-    info.setText(QStringLiteral("Qt3D Billboard"))
-    info.setIconSize(QSize(0,0))
+        ### Smaller billboard size
+        self.smallerSizeButton = QtWidgets.QPushButton(self.controlWidget)
+        self.smallerSizeButton.setText("Make Smaller")
+        self.smallerSizeButton.setToolTip("Make the size of billboard smaller")
 
-    ### Random size
-    QPushButton *randomSizeButton = new QPushButton(controlWidget)
-    randomSizeButton.setText(QStringLiteral("Random Size"))
-    randomSizeButton.setToolTip(QStringLiteral("Random Size"))
+        ### Switch image
+        self.successKidButton = QtWidgets.QPushButton(self.controlWidget)
+        self.successKidButton.setText("Success Kid")
+        self.successKidButton.setToolTip("Swith the image of the billboards to success kid")
 
-    ### Bigger billboard size
-    QPushButton *biggerSizeButton = new QPushButton(controlWidget)
-    biggerSizeButton.setText(QStringLiteral("Make Bigger"))
-    biggerSizeButton.setToolTip(QStringLiteral("Make the size of billboard bigger"))
+        self.qgisIDButton = QtWidgets.QPushButton(self.controlWidget)
+        self.qgisIDButton.setText("QGIS ID")
+        self.qgisIDButton.setToolTip("Swith the image of the billboards to QGIS ID logo")
 
-    ### Smaller billboard size
-    QPushButton *smallerSizeButton = new QPushButton(controlWidget)
-    smallerSizeButton.setText(QStringLiteral("Make Smaller"))
-    smallerSizeButton.setToolTip(QStringLiteral("Make the size of billboard smaller"))
+        ### Put to layout
+        self.controlLayout.addWidget(self.info)
+        self.controlLayout.addWidget(self.randomSizeButton)
+        self.controlLayout.addWidget(self.biggerSizeButton)
+        self.controlLayout.addWidget(self.smallerSizeButton)
+        self.controlLayout.addWidget(self.successKidButton)
+        self.controlLayout.addWidget(self.qgisIDButton)
 
-    ### Switch image
-    QPushButton *successKidButton = new QPushButton(controlWidget)
-    successKidButton.setText(QStringLiteral("Success Kid"))
-    successKidButton.setToolTip(QStringLiteral("Swith the image of the billboards to success kid"))
+        self.setWindowTitle("Custom Shader for Billboard")
 
-    QPushButton *qgisIDButton = new QPushButton(controlWidget)
-    qgisIDButton.setText(QStringLiteral("QGIS ID"))
-    qgisIDButton.setToolTip(QStringLiteral("Swith the image of the billboards to QGIS ID logo"))
+        ### Camera
+        self.camera = self.Display.camera()
+        self.camera.lens().setPerspectiveProjection(45.0, 16.0/9.0, 0.1, 100.0)
+        originalPosition = QtGui.QVector3D(0, 10.0, 20.0)
+        self.camera.setPosition(originalPosition)
+        originalViewCenter = QtGui.QVector3D(0, 0, 0)
+        self.camera.setViewCenter(originalViewCenter)
+        upVector = QtGui.QVector3D(0, 1.0, 0)
+        self.camera.setUpVector(upVector)
 
-    ### Put to layout
-    controlLayout.addWidget(info)
-    controlLayout.addWidget(randomSizeButton)
-    controlLayout.addWidget(biggerSizeButton)
-    controlLayout.addWidget(smallerSizeButton)
-    controlLayout.addWidget(successKidButton)
-    controlLayout.addWidget(qgisIDButton)
+        ### Camera control
+        self.camController = Qt3DExtras.QFirstPersonCameraController(self.rootEntity)
+        self.camController.setCamera(self.camera)
 
-    widget.setWindowTitle(QStringLiteral("Custom Shader for Billboard"))
+        ### Cuboid mesh data
+        self.cuboid = Qt3DExtras.QCuboidMesh()
+        self.cuboid.setXExtent(2)
+        self.cuboid.setYExtent(2)
+        self.cuboid.setZExtent(2)
 
-    ### Camera
-    Qt3DRender.QCamera *camera = view.camera()
-    camera.lens().setPerspectiveProjection(45.0f, 16.0f/9.0f, 0.1f, 100.0f)
-    QVector3D originalPosition(0, 10.0f, 20.0f)
-    camera.setPosition(originalPosition)
-    QVector3D originalViewCenter(0, 0, 0)
-    camera.setViewCenter(originalViewCenter)
-    QVector3D upVector(0, 1.0, 0)
-    camera.setUpVector(upVector)
+        ### Cuboid mesh transform
+        self.cuboidTransform = Qt3DCore.QTransform()
+        self.cuboidTransform.setScale(3.0)
+        self.cuboidTransform.setTranslation(QtGui.QVector3D(15.0, 0.0, 0.0))
 
-    ### Camera control
-    Qt3DExtras.QFirstPersonCameraController *camController = new Qt3DExtras.QFirstPersonCameraController(rootEntity)
-    camController.setCamera(camera)
+        ### Cuboid material
+        self.cuboidMaterial = Qt3DExtras.QPhongAlphaMaterial(self.rootEntity)
+        self.cuboidMaterial.setDiffuse(QtGui.QColor(255, 0, 0, 255))
+        self.cuboidMaterial.setAmbient(QtGui.QColor(255, 0, 0, 255))
+        self.cuboidMaterial.setSpecular(QtGui.QColor(255, 0, 0, 255))
+        self.cuboidMaterial.setAlpha(0.5)
+        self.cuboidMaterial.setShininess(1.0)
 
-    ### Cuboid mesh data
-    Qt3DExtras.QCuboidMesh *cuboid = new Qt3DExtras.QCuboidMesh()
-    cuboid.setXExtent(2)
-    cuboid.setYExtent(2)
-    cuboid.setZExtent(2)
+        ### Cuboid entity
+        self.cuboidEntity = Qt3DCore.QEntity(self.rootEntity)
+        self.cuboidEntity.addComponent(self.cuboid)
+        self.cuboidEntity.addComponent(self.cuboidTransform)
+        self.cuboidEntity.addComponent(self.cuboidMaterial)
+        self.cuboidEntity.setEnabled(True)
 
-    ### Cuboid mesh transform
-    Qt3DCore.QTransform *cuboidTransform = new Qt3DCore.QTransform()
-    cuboidTransform.setScale(3.0)
-    cuboidTransform.setTranslation(QVector3D(15.0f, 0.0f, 0.0f))
+        ### Blue Plane mesh
+        self.planeMesh = Qt3DExtras.QPlaneMesh()
+        self.planeMesh.setWidth(20)
+        self.planeMesh.setHeight(20)
 
-    ### Cuboid material
-    Qt3DExtras.QPhongAlphaMaterial *cuboidMaterial = new Qt3DExtras.QPhongAlphaMaterial(rootEntity)
-    cuboidMaterial.setDiffuse(QColor(255, 0, 0, 255))
-    cuboidMaterial.setAmbient(QColor(255, 0, 0, 255))
-    cuboidMaterial.setSpecular(QColor(255, 0, 0, 255))
-    cuboidMaterial.setAlpha(0.5)
-    cuboidMaterial.setShininess(1.0)
+        self.planeMaterial = Qt3DExtras.QPhongAlphaMaterial(self.rootEntity)
+        self.planeMaterial.setAmbient(QtGui.QColor(0, 0, 255, 255))
 
-    ### Cuboid entity
-    Qt3DCore.QEntity *cuboidEntity = new Qt3DCore.QEntity(rootEntity)
-    cuboidEntity.addComponent(cuboid)
-    cuboidEntity.addComponent(cuboidTransform)
-    cuboidEntity.addComponent(cuboidMaterial)
-    cuboidEntity.setEnabled(true)
+        self.planeEntity = Qt3DCore.QEntity(self.rootEntity)
+        self.planeEntity.addComponent(self.planeMesh)
+        self.planeEntity.addComponent(self.planeMaterial)
+        self.planeEntity.setEnabled(True)
 
-    ### Blue Plane mesh
-    Qt3DExtras.QPlaneMesh *planeMesh = new Qt3DExtras.QPlaneMesh()
-    planeMesh.setWidth(20)
-    planeMesh.setHeight(20)
+        ### Green Sphere
+        self.sphereMesh = Qt3DExtras.QSphereMesh()
+        self.greenMaterial = Qt3DExtras.QPhongAlphaMaterial(self.rootEntity)
+        self.greenMaterial.setAmbient(QtGui.QColor(0, 255, 0, 255))
+        self.sphereTransform = Qt3DCore.QTransform()
+        self.sphereTransform.setTranslation(QtGui.QVector3D(0.0, 5.0, 0.0))
 
-    Qt3DExtras.QPhongAlphaMaterial *planeMaterial = new Qt3DExtras.QPhongAlphaMaterial(rootEntity)
-    planeMaterial.setAmbient(QColor(0, 0, 255, 255))
-
-    Qt3DCore.QEntity *planeEntity = new Qt3DCore.QEntity(rootEntity)
-    planeEntity.addComponent(planeMesh)
-    planeEntity.addComponent(planeMaterial)
-    planeEntity.setEnabled(true)
-
-    ### Green Sphere
-    Qt3DExtras.QSphereMesh *sphereMesh = new  Qt3DExtras.QSphereMesh()
-    Qt3DExtras.QPhongAlphaMaterial *greenMaterial = new Qt3DExtras.QPhongAlphaMaterial(rootEntity)
-    greenMaterial.setAmbient(QColor(0, 255, 0, 255))
-    Qt3DCore.QTransform *sphereTransform = new Qt3DCore.QTransform()
-    sphereTransform.setTranslation(QVector3D(0.0f, 5.0f, 0.0f))
-
-    Qt3DCore.QEntity *sphereEntity = new Qt3DCore.QEntity(rootEntity)
-    sphereEntity.addComponent(sphereMesh)
-    sphereEntity.addComponent(greenMaterial)
-    sphereEntity.addComponent(sphereTransform)
-    sphereEntity.setEnabled(true)
-
-
-    ### Billboard
-    ### Points
-    QVector<QVector3D> pos
-    pos << QVector3D(1, 1, 0)
-    pos << QVector3D(-1, 2, 8)
-    pos << QVector3D(1, 1, 7)
-    pos << QVector3D(0, 0, 4)
-
-    ### Billboard Geometry
-    BillboardGeometry *billboardGeometry = new BillboardGeometry()
-    billboardGeometry.setPoints(pos)
-
-    ### Billboard Geometry Renderer
-    Qt3DRender.QGeometryRenderer *billboardGeometryRenderer = new Qt3DRender.QGeometryRenderer
-    billboardGeometryRenderer.setPrimitiveType( Qt3DRender.QGeometryRenderer.Points )
-    billboardGeometryRenderer.setGeometry( billboardGeometry )
-    billboardGeometryRenderer.setVertexCount( billboardGeometry.count() )
-
-    ### Billboard Material
-    BillboardMaterial *billboardMaterial = new BillboardMaterial()
-
-    ### Billboard Transform
-    Qt3DCore.QTransform *billboardTransform = new Qt3DCore.QTransform()
-    billboardTransform.setTranslation(QVector3D(0.0f, 1.5f, 0.0f))
-
-    ### Billboard Entity
-    Qt3DCore.QEntity *billboardEntity = new Qt3DCore.QEntity(rootEntity)
-    billboardEntity.addComponent(billboardMaterial)
-    billboardEntity.addComponent(billboardGeometryRenderer)
-    billboardEntity.addComponent(billboardTransform)
-    billboardEntity.setEnabled(true)
+        self.sphereEntity = Qt3DCore.QEntity(self.rootEntity)
+        self.sphereEntity.addComponent(self.sphereMesh)
+        self.sphereEntity.addComponent(self.greenMaterial)
+        self.sphereEntity.addComponent(self.sphereTransform)
+        self.sphereEntity.setEnabled(True)
 
 
-    ### Signal and slot for widgets
-    QObject.connect(randomSizeButton, &QPushButton.clicked, rootEntity, [ = ]{
-        int randomNumber = (qrand() % (20)) * 10 + 10 ### Random number multiple of 10 between 0 to 200, mull
-        billboardMaterial.setSize(QSizeF(randomNumber, randomNumber))
+        #### Billboard
+        #### Points
+        #QVector<QtGui.QVector3D> pos
+        #pos << QtGui.QVector3D(1, 1, 0)
+        #pos << QtGui.QVector3D(-1, 2, 8)
+        #pos << QtGui.QVector3D(1, 1, 7)
+        #pos << QtGui.QVector3D(0, 0, 4)
+        #
+        #### Billboard Geometry
+        #BillboardGeometry *billboardGeometry = new BillboardGeometry()
+        #billboardGeometry.setPoints(pos)
+        #
+        #### Billboard Geometry Renderer
+        #Qt3DRender.QGeometryRenderer *billboardGeometryRenderer = new Qt3DRender.QGeometryRenderer
+        #billboardGeometryRenderer.setPrimitiveType( Qt3DRender.QGeometryRenderer.Points )
+        #billboardGeometryRenderer.setGeometry( billboardGeometry )
+        #billboardGeometryRenderer.setVertexCount( billboardGeometry.count() )
+        #
+        #### Billboard Material
+        #BillboardMaterial *billboardMaterial = new BillboardMaterial()
+        #
+        #### Billboard Transform
+        #Qt3DCore.QTransform *billboardTransform = new Qt3DCore.QTransform()
+        #billboardTransform.setTranslation(QtGui.QVector3D(0.0, 1.5, 0.0))
+        #
+        #### Billboard Entity
+        #Qt3DCore.QEntity *billboardEntity = new Qt3DCore.QEntity(self.rootEntity)
+        #billboardEntity.addComponent(billboardMaterial)
+        #billboardEntity.addComponent(billboardGeometryRenderer)
+        #billboardEntity.addComponent(billboardTransform)
+        #billboardEntity.setEnabled(True)
+        #
+        #
+        #### Signal and slot for widgets
+        #QObject.connect(self.randomSizeButton, &QPushButton.clicked, self.rootEntity, [ = ]{
+        #    int randomNumber = (qrand() % (20)) * 10 + 10 ### Random number multiple of 10 between 0 to 200, mull
+        #    billboardMaterial.setSize(QSizeF(randomNumber, randomNumber))
+        #})
+        #
+        #QObject.connect(self.biggerSizeButton, &QPushButton.clicked, self.rootEntity, [ = ]{
+        #    billboardMaterial.setSize(billboardMaterial.size() + QSizeF(10, 10))
+        #})
+        #
+        #QObject.connect(self.smallerSizeButton, &QPushButton.clicked, self.rootEntity, [ = ]{
+        #    ### Minus size -. reverse the orientation of the image
+        #    billboardMaterial.setSize(billboardMaterial.size() - QSizeF(10, 10))
+        #})
+        #
+        #QObject.connect(self.successKidButton, &QPushButton.clicked, self.rootEntity, [ = ]{
+        #    billboardMaterial.setTexture2DFromImagePath( "qrc:/shaders/success-kid.png"))
+        #})
+        #
+        #QObject.connect(self.qgisIDButton, &QPushButton.clicked, self.rootEntity, [ = ]{
+        #    billboardMaterial.setTexture2DFromImagePath( "qrc:/shaders/QGIS-ID.png"))
+        #})
 
-    })
+        self.Display.setRootEntity(self.rootEntity)
 
-    QObject.connect(biggerSizeButton, &QPushButton.clicked, rootEntity, [ = ]{
-        billboardMaterial.setSize(billboardMaterial.size() + QSizeF(10, 10))
-    })
+        ###
+        self.Display.heightChanged.connect(self.correctCameraRatio)
+        self.Display.widthChanged.connect(self.correctCameraRatio)
 
-    QObject.connect(smallerSizeButton, &QPushButton.clicked, rootEntity, [ = ]{
-        ### Minus size -. reverse the orientation of the image
-        billboardMaterial.setSize(billboardMaterial.size() - QSizeF(10, 10))
-    })
+    def correctCameraRatio(self):
+        self.camera.setAspectRatio(self.Display.width()/self.Display.height())
 
-    QObject.connect(successKidButton, &QPushButton.clicked, rootEntity, [ = ]{
-        billboardMaterial.setTexture2DFromImagePath(QStringLiteral( "qrc:/shaders/success-kid.png"))
-    })
-
-    QObject.connect(qgisIDButton, &QPushButton.clicked, rootEntity, [ = ]{
-        billboardMaterial.setTexture2DFromImagePath(QStringLiteral( "qrc:/shaders/QGIS-ID.png"))
-    })
-
-    view.setRootEntity(rootEntity)
-
-    widget.show()
-    widget.resize(1600, 1200)
-
-    return app.exec()
-}
+if __name__ == "__main__":
+    print("Billboard-Example Window Startup")
+    app = QtWidgets.QApplication([])
+    app.setApplicationName(WindowTitle)
+    #app.ModuleVersions = "AMaDiA {}\n".format(Version) + app.ModuleVersions
+    window = MainWindow()
+    print(datetime.datetime.now().strftime('%H:%M:%S:'),"Billboard-Example Window Started\n")
+    window.show()
+    window.resize(906, 634)
+    sys.exit(app.exec())
