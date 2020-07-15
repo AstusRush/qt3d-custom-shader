@@ -2,7 +2,11 @@
 Learning Qt3D with Custom Shader.
 
 ## Billboards
-It's mainly porting billboard from QML billboard rendering from https://github.com/wonder-sk/qt3d-experiments/tree/master/billboards. Please check the screenshot and gif below to how it will be.
+https://github.com/wonder-sk/qt3d-experiments/tree/master/billboards is the QTML version.
+https://github.com/ismailsunni/qt3d-custom-shader is the C++ version.
+This fork is the Python version.
+
+Below is a screenshot and an animated gif from the C++ Version:
 
 ![](output/qt-3d-billboard.jpg)
 
