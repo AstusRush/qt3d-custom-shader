@@ -1,112 +1,89 @@
-#include <Qt3DRender/QShaderProgram>
-#include <Qt3DRender/QEffect>
-#include <Qt3DRender/QTechnique>
-#include <Qt3DRender/QRenderPass>
-#include <Qt3DRender/QGraphicsApiFilter>
-#include <Qt3DRender/QParameter>
-#include <Qt3DRender/QTexture>
-#include <Qt3DRender/QTextureImage>
-#include <QUrl>
-#include <QSizeF>
-#include <QVariant>
+from PyQt5 import QtWidgets,QtCore,QtGui,Qt , Qt3DAnimation,Qt3DCore,Qt3DExtras,Qt3DInput,Qt3DLogic,Qt3DRender , QtQml
+from PyQt5.QtCore import pyqtProperty, pyqtSignal # pylint: disable=no-name-in-module
 
-BillboardMaterial.BillboardMaterial()
-    : mSize( new Qt3DRender.QParameter( "BB_SIZE", QSizeF(100, 100), self ) )
-    , mWindowSize( new Qt3DRender.QParameter( "WIN_SCALE", QSizeF(800, 600), self ) )
-{
-    addParameter( mSize )
-    addParameter( mWindowSize )
+class BillboardMaterial(Qt3DRender.QMaterial):
+    def __init__(self, parent):
+        #super(BillboardGeometry, self).__init__(parent)
+        self.Size = Qt3DRender.QParameter( "BB_SIZE", QSizeF(100, 100), self )
+        self.WindowSize = Qt3DRender.QParameter( "WIN_SCALE", QSizeF(800, 600), self )
+        self.addParameter( self.Size )
+        self.addParameter( self.WindowSize )
 
-    Qt3DRender.QTextureImage *image = new Qt3DRender.QTextureImage
-    image.setSource(QUrl( QStringLiteral( "qrc:/shaders/success-kid.png") ))
+        self.image = Qt3DRender.QTextureImage()
+        self.image.setSource(QtCore.QUrl("qrc:/shaders/success-kid.png"))
 
-    ### Texture2D
-    Qt3DRender.QTexture2D *texture2D = new Qt3DRender.QTexture2D
-    texture2D.setGenerateMipMaps(false)
-    texture2D.setMagnificationFilter(Qt3DRender.QTexture2D.Linear)
-    texture2D.setMinificationFilter(Qt3DRender.QTexture2D.Linear)
+        ### Texture2D
+        texture2D = Qt3DRender.QTexture2D()
+        texture2D.setGenerateMipMaps(False)
+        texture2D.setMagnificationFilter(Qt3DRender.QTexture2D.Linear)
+        texture2D.setMinificationFilter(Qt3DRender.QTexture2D.Linear)
 
-    texture2D.addTextureImage(image)
+        texture2D.addTextureImage(self.image)
 
-    mTexture2D = new Qt3DRender.QParameter( "tex0", texture2D, self )
+        self.Texture2D = Qt3DRender.QParameter( "tex0", texture2D, self )
 
-    addParameter(mTexture2D)
+        self.addParameter(self.Texture2D)
 
-    ### Shader program
-    Qt3DRender.QShaderProgram *shaderProgram = new Qt3DRender.QShaderProgram( self )
-    shaderProgram.setVertexShaderCode( Qt3DRender.QShaderProgram.loadSource( QUrl( QStringLiteral( "qrc:/shaders/billboards.vert" ) ) ) )
-    shaderProgram.setFragmentShaderCode( Qt3DRender.QShaderProgram.loadSource( QUrl( QStringLiteral( "qrc:/shaders/billboards.frag" ) ) ) )
-    shaderProgram.setGeometryShaderCode( Qt3DRender.QShaderProgram.loadSource( QUrl( QStringLiteral( "qrc:/shaders/billboards.geom" ) ) ) )
+        ### Shader program
+        self.shaderProgram = Qt3DRender.QShaderProgram( self )
+        self.shaderProgram.setVertexShaderCode(   Qt3DRender.QShaderProgram.loadSource( QtCore.QUrl( "qrc:/shaders/billboards.vert" ) ) )
+        self.shaderProgram.setFragmentShaderCode( Qt3DRender.QShaderProgram.loadSource( QtCore.QUrl( "qrc:/shaders/billboards.frag" ) ) )
+        self.shaderProgram.setGeometryShaderCode( Qt3DRender.QShaderProgram.loadSource( QtCore.QUrl( "qrc:/shaders/billboards.geom" ) ) )
 
-    ### Render Pass
-    Qt3DRender.QRenderPass *renderPass = new Qt3DRender.QRenderPass( self )
-    renderPass.setShaderProgram(shaderProgram)
+        ### Render Pass
+        self.renderPass = Qt3DRender.QRenderPass( self )
+        self.renderPass.setShaderProgram(self.shaderProgram)
 
-    ### without self filter the default forward renderer would not render self
-    Qt3DRender.QFilterKey *filterKey = new Qt3DRender.QFilterKey
-    filterKey.setName( QStringLiteral( "renderingStyle" ) )
-    filterKey.setValue( "forward" )
+        ### without self filter the default forward renderer would not render self
+        self.filterKey = Qt3DRender.QFilterKey()
+        self.filterKey.setName( QStringLiteral( "renderingStyle" ) )
+        self.filterKey.setValue( "forward" )
 
-    ### Technique
-    Qt3DRender.QTechnique *technique = new Qt3DRender.QTechnique
-    technique.addRenderPass(renderPass)
-    technique.addFilterKey(filterKey)
-    technique.graphicsApiFilter().setApi( Qt3DRender.QGraphicsApiFilter.OpenGL )
-    technique.graphicsApiFilter().setProfile( Qt3DRender.QGraphicsApiFilter.CoreProfile )
-    technique.graphicsApiFilter().setMajorVersion( 3 )
-    technique.graphicsApiFilter().setMinorVersion( 1 )
+        ### Technique
+        self.technique = Qt3DRender.QTechnique()
+        self.technique.addRenderPass(self.renderPass)
+        self.technique.addFilterKey(self.filterKey)
+        self.technique.graphicsApiFilter().setApi( Qt3DRender.QGraphicsApiFilter.OpenGL )
+        self.technique.graphicsApiFilter().setProfile( Qt3DRender.QGraphicsApiFilter.CoreProfile )
+        self.technique.graphicsApiFilter().setMajorVersion( 3 )
+        self.technique.graphicsApiFilter().setMinorVersion( 1 )
 
-    ### Effect
-    Qt3DRender.QEffect *effect = new Qt3DRender.QEffect( self )
-    effect.addTechnique(technique)
+        ### Effect
+        self.effect = Qt3DRender.QEffect( self )
+        self.effect.addTechnique(self.technique)
 
-    setEffect( effect )
-}
+        self.setEffect( self.effect )
 
-void BillboardMaterial.setSize(const QSizeF size)
-{
-    mSize.setValue(size)
-}
+    def setSize(self, size):
+        self.Size.setValue(size)
 
-QSizeF BillboardMaterial.size() const
-{
-    return mSize.value().value<QSizeF>()
-}
+    def size(self):
+        return self.Size.value()
 
-void BillboardMaterial.setWindowSize(const QSizeF size)
-{
-    mWindowSize.setValue(size)
-}
+    def setWindowSize(self, size):
+        self.WindowSize.setValue(size)
 
-QSizeF BillboardMaterial.windowSize() const
-{
-    return mWindowSize.value().value<QSizeF>()
-}
+    def windowSize(self):
+        return self.WindowSize.value()
 
-void BillboardMaterial.setTexture2D(Qt3DRender.QTexture2D *texture2D)
-{
-    mTexture2D.setValue(QVariant.fromValue(texture2D))
-}
+    def setTexture2D(self, texture2D):
+        self.Texture2D.setValue(QtCore.QVariant.fromValue(texture2D)) #TODO: Check this. fromValue seems to not exist...
 
-Qt3DRender.QTexture2D* BillboardMaterial.texture2D()
-{
-    QVariant variant = mTexture2D.value()
-    return qvariant_cast<Qt3DRender.QTexture2D*>(variant)
-}
+    def texture2D(self):
+        variant = self.Texture2D.value()
+        return qvariant_cast<Qt3DRender.QTexture2D*>(variant) #TODO: complete this
 
-void BillboardMaterial.setTexture2DFromImagePath(QString imagePath)
-{
-    ### Texture Image
-    Qt3DRender.QTextureImage *image = new Qt3DRender.QTextureImage
-    image.setSource(QUrl( imagePath ))
+    def setTexture2DFromImagePath(self, imagePath):
+        ### Texture Image
+        image = Qt3DRender.QTextureImage()
+        image.setSource(QtCore.QUrl( imagePath ))
 
-    ### Texture2D
-    Qt3DRender.QTexture2D *texture2D = new Qt3DRender.QTexture2D
-    texture2D.setGenerateMipMaps(false)
-    texture2D.setMagnificationFilter(Qt3DRender.QTexture2D.Linear)
-    texture2D.setMinificationFilter(Qt3DRender.QTexture2D.Linear)
+        ### Texture2D
+        texture2D = Qt3DRender.QTexture2D()
+        texture2D.setGenerateMipMaps(False)
+        texture2D.setMagnificationFilter(Qt3DRender.QTexture2D.Linear)
+        texture2D.setMinificationFilter(Qt3DRender.QTexture2D.Linear)
 
-    texture2D.addTextureImage(image)
+        texture2D.addTextureImage(image)
 
-    setTexture2D(texture2D)
-}
+        self.setTexture2D(texture2D)

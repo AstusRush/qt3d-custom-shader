@@ -1,42 +1,38 @@
-#include <Qt3DRender/QAttribute>
+from PyQt5 import QtWidgets,QtCore,QtGui,Qt , Qt3DAnimation,Qt3DCore,Qt3DExtras,Qt3DInput,Qt3DLogic,Qt3DRender , QtQml
+from PyQt5.QtCore import pyqtProperty, pyqtSignal # pylint: disable=no-name-in-module
 
 
-BillboardGeometry.BillboardGeometry( Qt3DCore.QNode *parent )
-  : Qt3DRender.QGeometry( parent )
-  , mPositionAttribute( new Qt3DRender.QAttribute( self ) )
-  , mVertexBuffer( new Qt3DRender.QBuffer( Qt3DRender.QBuffer.VertexBuffer, self ) )
-{
+class BillboardGeometry(Qt3DRender.QGeometry):
+    S_countChanged = pyqtSignal(int)
+    def __init__(self, parent):
+        super(BillboardGeometry, self).__init__(parent)
+        self.PositionAttribute = Qt3DRender.QAttribute(self)
+        self.VertexBuffer = Qt3DRender.QBuffer( Qt3DRender.QBuffer.VertexBuffer, self )
+        self.PositionAttribute.setAttributeType( Qt3DRender.QAttribute.VertexAttribute )
+        self.PositionAttribute.setBuffer( self.VertexBuffer )
+        self.PositionAttribute.setVertexBaseType( Qt3DRender.QAttribute.Float )
+        self.PositionAttribute.setVertexSize( 3 )
+        self.PositionAttribute.setName( Qt3DRender.QAttribute.defaultPositionAttributeName() )
+        self.addAttribute( self.PositionAttribute )
 
-  mPositionAttribute.setAttributeType( Qt3DRender.QAttribute.VertexAttribute )
-  mPositionAttribute.setBuffer( mVertexBuffer )
-  mPositionAttribute.setVertexBaseType( Qt3DRender.QAttribute.Float )
-  mPositionAttribute.setVertexSize( 3 )
-  mPositionAttribute.setName( Qt3DRender.QAttribute.defaultPositionAttributeName() )
+    def count(self):
+        return self.VertexCount
 
-  addAttribute( mPositionAttribute )
+    def setPoints(self, vertices): #TODO: complete this
+        vertexBufferData = QtCore.QByteArray()
+        #vertexBufferData.resize( len(vertices) * 3 * sizeof( float ) )
+        #rawVertexArray = reinterpret_cast<float *>( vertexBufferData.data() )
+        #idx = 0
+        #for v in vertices:
+        #    rawVertexArray.append(v.x())
+        #    rawVertexArray.append(v.y())
+        #    rawVertexArray.append(v.z())
+        for v in vertices:
+            vertexBufferData.append(v.x())
+            vertexBufferData.append(v.y())
+            vertexBufferData.append(v.z())
 
-}
+        self.VertexCount = len(vertices)
+        self.VertexBuffer.setData( vertexBufferData )
 
-int BillboardGeometry.count()
-{
-  return mVertexCount
-}
-
-void BillboardGeometry.setPoints(const QVector<QVector3D> &vertices)
-{
-  QByteArray vertexBufferData
-  vertexBufferData.resize( vertices.size() * 3 * sizeof( float ) )
-  float *rawVertexArray = reinterpret_cast<float *>( vertexBufferData.data() )
-  int idx = 0
-  for ( const auto &v : vertices )
-  {
-    rawVertexArray[idx++] = v.x()
-    rawVertexArray[idx++] = v.y()
-    rawVertexArray[idx++] = v.z()
-  }
-
-  mVertexCount = vertices.count()
-  mVertexBuffer.setData( vertexBufferData )
-
-  emit countChanged(mVertexCount)
-}
+        self.S_countChanged.emit(self.VertexCount)

@@ -15,7 +15,7 @@ if __name__ == "__main__":
         except:
             pass
 
-#import billboardgeometry
+from billboardgeometry import BillboardGeometry
 #import billboardmaterial
 import sys
 from PyQt5 import QtWidgets,QtCore,QtGui,Qt , Qt3DAnimation,Qt3DCore,Qt3DExtras,Qt3DInput,Qt3DLogic,Qt3DRender , QtQml
@@ -56,9 +56,8 @@ from PyQt5 import QtWidgets,QtCore,QtGui,Qt , Qt3DAnimation,Qt3DCore,Qt3DExtras,
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent = None):
-        self.cMode = 1
         super(MainWindow, self).__init__(parent)
-        self.setWindowTitle("AGE Test Window")
+        self.setWindowTitle("Custom Shader for Billboard")
         self.setWindowIcon(QtWidgets.QApplication.style().standardIcon(QtWidgets.QStyle.SP_ComputerIcon))
         self.Display = Qt3DExtras.Qt3DWindow()
         self.DisplayContainer = QtWidgets.QWidget.createWindowContainer(self.Display)
@@ -118,7 +117,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.controlLayout.addWidget(self.successKidButton)
         self.controlLayout.addWidget(self.qgisIDButton)
 
-        self.setWindowTitle("Custom Shader for Billboard")
 
         ### Camera
         self.camera = self.Display.camera()
@@ -187,18 +185,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.sphereEntity.setEnabled(True)
 
 
-        #### Billboard
-        #### Points
-        #QVector<QtGui.QVector3D> pos
-        #pos << QtGui.QVector3D(1, 1, 0)
-        #pos << QtGui.QVector3D(-1, 2, 8)
-        #pos << QtGui.QVector3D(1, 1, 7)
-        #pos << QtGui.QVector3D(0, 0, 4)
-        #
-        #### Billboard Geometry
-        #BillboardGeometry *billboardGeometry = new BillboardGeometry()
-        #billboardGeometry.setPoints(pos)
-        #
+        ### Billboard
+        ### Points
+        pos = [QtGui.QVector3D(1, 1, 0), QtGui.QVector3D(-1, 2, 8), QtGui.QVector3D(1, 1, 7), QtGui.QVector3D(0, 0, 4)]
+        
+        ### Billboard Geometry
+        self.billboardGeometry = BillboardGeometry()
+        self.billboardGeometry.setPoints(pos)
+        
         #### Billboard Geometry Renderer
         #Qt3DRender.QGeometryRenderer *billboardGeometryRenderer = new Qt3DRender.QGeometryRenderer
         #billboardGeometryRenderer.setPrimitiveType( Qt3DRender.QGeometryRenderer.Points )
