@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets,QtCore,QtGui,Qt , Qt3DAnimation,Qt3DCore,Qt3DExtras,Qt3DInput,Qt3DLogic,Qt3DRender , QtQml
 from PyQt5.QtCore import pyqtProperty, pyqtSignal # pylint: disable=no-name-in-module
-
+import ctypes
 
 class BillboardGeometry(Qt3DRender.QGeometry):
     S_countChanged = pyqtSignal(int)
@@ -28,9 +28,9 @@ class BillboardGeometry(Qt3DRender.QGeometry):
         #    rawVertexArray.append(v.y())
         #    rawVertexArray.append(v.z())
         for v in vertices:
-            vertexBufferData.append(v.x())
-            vertexBufferData.append(v.y())
-            vertexBufferData.append(v.z())
+            vertexBufferData.append(bin(ctypes.c_uint.from_buffer(ctypes.c_float(v.x())).value).replace('0b', '').rjust(32, '0'))
+            vertexBufferData.append(bin(ctypes.c_uint.from_buffer(ctypes.c_float(v.y())).value).replace('0b', '').rjust(32, '0'))
+            vertexBufferData.append(bin(ctypes.c_uint.from_buffer(ctypes.c_float(v.z())).value).replace('0b', '').rjust(32, '0'))
 
         self.VertexCount = len(vertices)
         self.VertexBuffer.setData( vertexBufferData )

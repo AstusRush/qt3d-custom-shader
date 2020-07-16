@@ -4,7 +4,7 @@ import shaders
 
 class BillboardMaterial(Qt3DRender.QMaterial):
     def __init__(self, parent = None):
-        super(BillboardGeometry, self).__init__(parent)
+        super(BillboardMaterial, self).__init__(parent)
         self.Size = Qt3DRender.QParameter( "BB_SIZE", QtCore.QSizeF(100, 100), self )
         self.WindowSize = Qt3DRender.QParameter( "WIN_SCALE", QtCore.QSizeF(800, 600), self )
         self.addParameter( self.Size )
@@ -37,7 +37,7 @@ class BillboardMaterial(Qt3DRender.QMaterial):
 
         ### without self filter the default forward renderer would not render self
         self.filterKey = Qt3DRender.QFilterKey()
-        self.filterKey.setName( QStringLiteral( "renderingStyle" ) )
+        self.filterKey.setName(  "renderingStyle" )
         self.filterKey.setValue( "forward" )
 
         ### Technique
@@ -68,11 +68,11 @@ class BillboardMaterial(Qt3DRender.QMaterial):
         return self.WindowSize.value()
 
     def setTexture2D(self, texture2D):
-        self.Texture2D.setValue(QtCore.QVariant.fromValue(texture2D)) #TODO: Check this. fromValue seems to not exist...
+        self.Texture2D.setValue(texture2D)#QtCore.QVariant.fromValue(texture2D)) #TODO: Check this. fromValue seems to not exist...
 
     def texture2D(self):
         variant = self.Texture2D.value()
-        return qvariant_cast<Qt3DRender.QTexture2D*>(variant) #TODO: complete this
+        return Qt3DRender.QTexture2D(variant) #TODO: check this
 
     def setTexture2DFromImagePath(self, imagePath):
         ### Texture Image
