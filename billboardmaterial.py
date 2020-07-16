@@ -1,11 +1,12 @@
 from PyQt5 import QtWidgets,QtCore,QtGui,Qt , Qt3DAnimation,Qt3DCore,Qt3DExtras,Qt3DInput,Qt3DLogic,Qt3DRender , QtQml
 from PyQt5.QtCore import pyqtProperty, pyqtSignal # pylint: disable=no-name-in-module
+import shaders
 
 class BillboardMaterial(Qt3DRender.QMaterial):
-    def __init__(self, parent):
-        #super(BillboardGeometry, self).__init__(parent)
-        self.Size = Qt3DRender.QParameter( "BB_SIZE", QSizeF(100, 100), self )
-        self.WindowSize = Qt3DRender.QParameter( "WIN_SCALE", QSizeF(800, 600), self )
+    def __init__(self, parent = None):
+        super(BillboardGeometry, self).__init__(parent)
+        self.Size = Qt3DRender.QParameter( "BB_SIZE", QtCore.QSizeF(100, 100), self )
+        self.WindowSize = Qt3DRender.QParameter( "WIN_SCALE", QtCore.QSizeF(800, 600), self )
         self.addParameter( self.Size )
         self.addParameter( self.WindowSize )
 

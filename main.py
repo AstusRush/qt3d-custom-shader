@@ -16,7 +16,7 @@ if __name__ == "__main__":
             pass
 
 from billboardgeometry import BillboardGeometry
-#import billboardmaterial
+from billboardmaterial import BillboardMaterial
 import sys
 from PyQt5 import QtWidgets,QtCore,QtGui,Qt , Qt3DAnimation,Qt3DCore,Qt3DExtras,Qt3DInput,Qt3DLogic,Qt3DRender , QtQml
 
@@ -193,49 +193,37 @@ class MainWindow(QtWidgets.QMainWindow):
         self.billboardGeometry = BillboardGeometry()
         self.billboardGeometry.setPoints(pos)
         
-        #### Billboard Geometry Renderer
-        #Qt3DRender.QGeometryRenderer *billboardGeometryRenderer = new Qt3DRender.QGeometryRenderer
-        #billboardGeometryRenderer.setPrimitiveType( Qt3DRender.QGeometryRenderer.Points )
-        #billboardGeometryRenderer.setGeometry( billboardGeometry )
-        #billboardGeometryRenderer.setVertexCount( billboardGeometry.count() )
-        #
-        #### Billboard Material
-        #BillboardMaterial *billboardMaterial = new BillboardMaterial()
-        #
-        #### Billboard Transform
-        #Qt3DCore.QTransform *billboardTransform = new Qt3DCore.QTransform()
-        #billboardTransform.setTranslation(QtGui.QVector3D(0.0, 1.5, 0.0))
-        #
-        #### Billboard Entity
-        #Qt3DCore.QEntity *billboardEntity = new Qt3DCore.QEntity(self.rootEntity)
-        #billboardEntity.addComponent(billboardMaterial)
-        #billboardEntity.addComponent(billboardGeometryRenderer)
-        #billboardEntity.addComponent(billboardTransform)
-        #billboardEntity.setEnabled(True)
-        #
-        #
-        #### Signal and slot for widgets
-        #QObject.connect(self.randomSizeButton, &QPushButton.clicked, self.rootEntity, [ = ]{
-        #    int randomNumber = (qrand() % (20)) * 10 + 10 ### Random number multiple of 10 between 0 to 200, mull
-        #    billboardMaterial.setSize(QSizeF(randomNumber, randomNumber))
-        #})
-        #
-        #QObject.connect(self.biggerSizeButton, &QPushButton.clicked, self.rootEntity, [ = ]{
-        #    billboardMaterial.setSize(billboardMaterial.size() + QSizeF(10, 10))
-        #})
-        #
-        #QObject.connect(self.smallerSizeButton, &QPushButton.clicked, self.rootEntity, [ = ]{
-        #    ### Minus size -. reverse the orientation of the image
-        #    billboardMaterial.setSize(billboardMaterial.size() - QSizeF(10, 10))
-        #})
-        #
-        #QObject.connect(self.successKidButton, &QPushButton.clicked, self.rootEntity, [ = ]{
-        #    billboardMaterial.setTexture2DFromImagePath( "qrc:/shaders/success-kid.png"))
-        #})
-        #
-        #QObject.connect(self.qgisIDButton, &QPushButton.clicked, self.rootEntity, [ = ]{
-        #    billboardMaterial.setTexture2DFromImagePath( "qrc:/shaders/QGIS-ID.png"))
-        #})
+        ### Billboard Geometry Renderer
+        self.billboardGeometryRenderer = Qt3DRender.QGeometryRenderer()
+        self.billboardGeometryRenderer.setPrimitiveType( Qt3DRender.QGeometryRenderer.Points )
+        self.billboardGeometryRenderer.setGeometry( self.billboardGeometry )
+        self.billboardGeometryRenderer.setVertexCount( self.billboardGeometry.count() )
+        
+        ### Billboard Material
+        self.billboardMaterial = BillboardMaterial()
+        
+        ### Billboard Transform
+        self.billboardTransform = Qt3DCore.QTransform()
+        self.billboardTransform.setTranslation(QtGui.QVector3D(0.0, 1.5, 0.0))
+        
+        ### Billboard Entity
+        self.billboardEntity = Qt3DCore.QEntity(self.rootEntity)
+        self.billboardEntity.addComponent(self.billboardMaterial)
+        self.billboardEntity.addComponent(self.billboardGeometryRenderer)
+        self.billboardEntity.addComponent(self.billboardTransform)
+        self.billboardEntity.setEnabled(True)
+        
+        
+        ### Signal and slot for widgets
+        self.randomSizeButton.pressed.connect(self.rs)
+        
+        self.biggerSizeButton.pressed.connect(self.bs)
+        
+        self.smallerSizeButton.pressed.connect(self.ss)
+        
+        self.successKidButton.pressed.connect(self.sk)
+        
+        self.qgisIDButton.pressed.connect(self.qg)
 
         self.Display.setRootEntity(self.rootEntity)
 
@@ -246,11 +234,27 @@ class MainWindow(QtWidgets.QMainWindow):
     def correctCameraRatio(self):
         self.camera.setAspectRatio(self.Display.width()/self.Display.height())
 
+    def rs(self):
+        randomNumber = (QtCore.qrand() % 20) * 10 + 10 ### Random number multiple of 10 between 0 to 200, mull
+        self.billboardMaterial.setSize(QtCore.QSizeF(randomNumber, randomNumber))
+
+    def bs(self):
+        self.billboardMaterial.setSize(self.billboardMaterial.size() + QtCore.QSizeF(10, 10))
+
+    def ss(self):
+        ### Minus size -. reverse the orientation of the image
+        self.billboardMaterial.setSize(self.billboardMaterial.size() - QtCore.QSizeF(10, 10))
+
+    def sk(self):
+        self.billboardMaterial.setTexture2DFromImagePath( "qrc:/shaders/success-kid.png")
+
+    def qg(self):
+        self.billboardMaterial.setTexture2DFromImagePath( "qrc:/shaders/QGIS-ID.png")
+
 if __name__ == "__main__":
     print("Billboard-Example Window Startup")
     app = QtWidgets.QApplication([])
     app.setApplicationName(WindowTitle)
-    #app.ModuleVersions = "AMaDiA {}\n".format(Version) + app.ModuleVersions
     window = MainWindow()
     print(datetime.datetime.now().strftime('%H:%M:%S:'),"Billboard-Example Window Started\n")
     window.show()

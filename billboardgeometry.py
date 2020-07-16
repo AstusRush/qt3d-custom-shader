@@ -4,7 +4,7 @@ from PyQt5.QtCore import pyqtProperty, pyqtSignal # pylint: disable=no-name-in-m
 
 class BillboardGeometry(Qt3DRender.QGeometry):
     S_countChanged = pyqtSignal(int)
-    def __init__(self, parent):
+    def __init__(self, parent=None):
         super(BillboardGeometry, self).__init__(parent)
         self.PositionAttribute = Qt3DRender.QAttribute(self)
         self.VertexBuffer = Qt3DRender.QBuffer( Qt3DRender.QBuffer.VertexBuffer, self )

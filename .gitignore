@@ -30,6 +30,8 @@
 *.exe
 *.out
 *.app
+_qrc_to_py_.bat
+
 # This file is used to ignore files which are generated
 # ----------------------------------------------------------------------------
 
